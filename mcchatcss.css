@@ -1,0 +1,43 @@
+/* css */
+.visit{
+	background-color: white;
+	height: 450px;
+	color: black;
+	border-radius: 5px;
+}
+.inputBox{
+	width: 100px;
+	height: 30px;
+	vertical-align: 
+}
+.messages{
+	height: 450px;
+	background-color: white;
+	border-radius: 5px;
+}
+.modal {
+    position: relative !important;
+    margin-left: 30% !important;
+    right-padding: 100px;
+    margin-top: -400px !important;
+    background-color: transparent;
+    width: 50% !important;
+}
+.headerOne{
+	text-align: center;
+	font-family: Impact, Haettenschweiler, 'Franklin Gothic Bold', Charcoal, 'Helvetica Inserat', 'Bitstream Vera Sans Bold', 'Arial Black', 'sans serif';
+	font-size: 24px;
+	font-style: normal;
+	font-variant: normal;
+	font-weight: 500;
+	line-height: 26.4px;
+	color: white;
+	text-shadow: -3px 0 black, 0 3px black, 3px 0 black, 0 -3px black;
+
+}
+body{
+	background-color: gray;
+}
+.hell {
+	font-variant: bold;
+}

@@ -1,0 +1,175 @@
+<!doctype html>
+<html>
+  <head>
+    <!-- Firebase -->
+    <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
+    <!-- Jquery -->
+    <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js'></script>
+
+    <!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" integrity="sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ==" crossorigin="anonymous">
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css" integrity="sha384-aUGj/X2zp5rLCbBxumKTCw2Z50WgIr1vs/PFN4praOTvYXWlVyh2UtNUU0KAUhAX" crossorigin="anonymous">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" integrity="sha512-K1qjQ+NcF2TYO/eI3M6v8EiNYZfA95pQumfvcVrTHtwQVDG+aHRqLi/ETn2uB+1JqwYqVG3LIvdm9lj6imS/pQ==" crossorigin="anonymous"></script>
+    <!-- CSS -->
+    <link rel='stylesheet' type='text/css' href='mcchatcss.css '>
+
+
+
+  </head>
+  <body>
+    <div class="headerOne"><h1>PineappleMcChat</h1></div><!-- Page Title-->
+    <div class="container">
+      <div class="row">
+        <div class="col-md-2 visit">
+          <p>Who the hell is here?</p> <!--Over the User List-->
+        </div>
+        <div class="col-md-10">
+
+         <div class="row">
+          <div class="col-md-10">
+            <div id='messagesDiv' class="messages"></div>
+          </div>
+          <div class="col-md-2">
+            <button type="button" class="btn btn-warning" onclick=logout>Logout</button>
+          </div>
+
+
+         <input type='text' id='nameInput' placeholder='Name'>
+         <input type='text' id='messageInput' class="inputBox" placeholder='Message'>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+    <div class="modal fade" id="auth-modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title text-center">Authenticate</h4>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-3"></div>
+          <div class="col-md-3">
+              <a id="twitter-signin" href="javascript:login('twitter');">
+                <i id="twitter-signin-btn" class="fa fa-twitter fa-5x"></i>
+                <p>Twitter</p>
+              </a>
+          </div>
+          <div class="col-md-3"></div>
+          <div class="col-md-3"></div>
+
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+    <script>
+      var myDataRef = new Firebase('https://pineapplemcchat.firebaseio.com/');
+      var name= "";
+      var authModal = $('#auth-modal').modal({show: false}); //we dont want the modal to show right away
+      var userId;
+
+            // Create a callback which logs the current auth state
+            //want to check to see if the user is logged in: this is with a getAuth function
+
+      var authData = myDataRef.getAuth();
+
+      if (authData){
+        userId = authData.uid;
+        name = authData[authData.provider].displayName;
+        console.log("user is already logged in");
+      }
+
+     function login(provider){
+        console.log("login with ", provider);
+        authModal.modal('hide');
+        myDataRef.authWithOAuthPopup(provider, function(error, authData) {
+         if (error) {
+         console.log("Login Failed!", error);
+          } else {
+          console.log("Authenticated successfully with payload:", authData);
+          // console.log("User " + authData.uid + " is logged in with " + authData.provider);
+          userId = authData.uid;
+          name = authData[authData.provider].displayName;
+          myDataRef.child('user').child(userId).once("value", function(snapshot){
+            var ifExists = snapshot.exists(); // a firebase function
+            if (ifExists){
+              console.log('user is already in the system');
+            } else {
+               myDataRef.child('user').child(userId).push({id: userId, name:name});
+            }
+          });
+         
+        }
+      });
+    }
+      myDataRef.child('user').on('value', function(snapshot){
+        var allNames = snapshot.val();
+        //console.log(allNames);
+        //for loop
+        for (var u in allNames) {
+          for(var i in allNames[u]){
+            console.log(allNames[u][i].name);
+            displayNamesUser(allNames[u][i].name);
+          }
+          
+        }
+      })
+
+      function displayNamesUser(userName){
+         $('<div/>').text(userName).appendTo($('#namesDiv'));
+      }
+
+      $('#messageInput').keypress(function (e) {
+        if (e.keyCode == 13) {
+          // var name = $('#nameInput').val();
+          var text = $('#messageInput').val();
+          console.log('the user is', text );
+
+          //is user logged in?
+          if (name == "") {
+            authModal.modal('show');
+          } else { //dont submit anything unless we know the users name
+          myDataRef.child('messages').push({name: name, text: text});
+          $('#messageInput').val(''); 
+          }
+        }
+      });
+
+        function logout(){
+          console.log("logging out");
+          myDataRef.unauth();
+          location.reload();
+        }
+
+      
+
+      myDataRef.child('messages').on('child_added', function(snapshot) {
+        var message = snapshot.val();
+        //console.log(message);
+        displayChatMessage(message.name, message.text);
+      });
+      function displayChatMessage(name, text) {
+        $('<div/>').text(text).prepend($('<em/>').text(name+': ')).appendTo($('#messagesDiv'));
+        $('#messagesDiv')[0].scrollTop = $('#messagesDiv')[0].scrollHeight;
+      };
+    </script>
+    <!-- <h3>What the shit people are talking about</h3> <!-- Over the chat box --> 
+  </body>
+</html>
