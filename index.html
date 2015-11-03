@@ -35,24 +35,27 @@
       <div class="row">
         <div class="col-md-2 visit">
           <p>Who the hell is here?</p> <!--Over the User List-->
+            <div id="namesDiv"></div>
+            <input class="nameInput" type='text' id='nameInput' placeholder='Enter Name Here'>
         </div>
         <div class="col-md-10">
 
-         <div class="row">
-          <div class="col-md-10">
-            <div id='messagesDiv' class="messages"></div>
-          </div>
-          <div class="col-md-2">
-            <button type="button" class="btn btn-warning" onclick=logout>Logout</button>
-          </div>
+            <div class="row">
 
+              <div class="col-md-10">
+                <div id='messagesDiv' class="messages"></div>
+              </div>
 
-         <input type='text' id='nameInput' placeholder='Name'>
-         <input type='text' id='messageInput' class="inputBox" placeholder='Message'>
+              <div class="col-md-2">
+                <button type="button" class="btn btn-warning" onclick="logout()">Logout</button>
+              </div>
+
+            </div>
+
+            <input type='text' id='messageInput' class="inputBox" placeholder='Say Something Here'>
         </div>
       </div>
     </div>
-  </div>
 
 
 
@@ -147,13 +150,29 @@
         if (e.keyCode == 13) {
           // var name = $('#nameInput').val();
           var text = $('#messageInput').val();
+            var displayDate= new Date();
+            console.log(displayDate);
+
+            var dated = displayDate.getDate();
+            var month = displayDate.getMonth() + 1;
+            var year = displayDate.getFullYear();
+            var hour = displayDate.getHours();
+            if (hour < 10) hour = "0" + hour;
+            var min = displayDate.getMinutes();
+            if (min < 10) min = "0" + min;
+            var sec   = displayDate.getSeconds();
+            if (sec <10) sec = "0" + sec;
+
+            var dateDisplayed = dated + "/" + month + "/" + year + " " + hour + ":" + min + ":" + sec;
+
+            var date = dateDisplayed;
           console.log('the user is', text );
 
           //is user logged in?
           if (name == "") {
             authModal.modal('show');
           } else { //dont submit anything unless we know the users name
-          myDataRef.child('messages').push({name: name, text: text});
+          myDataRef.child('messages').push({name: name, text: text, date:date});
           $('#messageInput').val(''); 
           }
         }
@@ -169,20 +188,39 @@
 
       myDataRef.child('messages').on('child_added', function(snapshot) {
         var message = snapshot.val();
-        //console.log(message);
-        displayChatMessage(message.name, message.text);
+        console.log(message);
+          console.log(message.date);
+        displayChatMessage(message.name, message.text, message.date);
+          //chat message plays sound
           $('#blop')[0].play();
           $('#messagesDiv').emoticonize();
-
-
       });
 //      Display chat message and play a sound when a message is received
-      function displayChatMessage(name, text) {
-        $('<div/>').text(text).prepend($('<em/>').text(name+': ')).appendTo($('#messagesDiv'));
-        $('#messagesDiv')[0].scrollTop = $('#messagesDiv')[0].scrollHeight;
+      function displayChatMessage(name, text, date) {
+          console.log(date);
+
+          var dateDisplayed = date;
+
+
+//          console.log(hour);
+
+//          displayDate.setTime(date);
+
+        $('<div/>').text(text).prepend($('<em/>').text(dateDisplayed + " " + name+': ')).appendTo($('#messagesDiv'));
+          $('#messagesDiv')[0].scrollTop = $('#messagesDiv')[0].scrollHeight;
+//      $('#messagesDiv').animate({
+//              scrollTop: $('#messagesDiv').height()
+//          }, 100);
+
+//          $('#messagesDiv')[0].scrollTop = $('#messagesDiv')[0].scrollHeight;
       };
 //        This is the emoticon stuff, I also dont know where to put it.
 //              $('.comment').emoticonize();
+      function pageScroll() {
+          window.scrollBy(0,1);
+          scrolldelay = setTimeout(pageScroll(),10);
+          console.log("were gonna scroll the fucking page");
+      }
 
     </script>
     <!-- <h3>What the shit people are talking about</h3> <!-- Over the chat box --> 
